@@ -9,6 +9,9 @@ create table if not exists public.memories (
   title text not null,
   note text,
   happened_on date,
+  place text,
+  lat double precision,
+  lng double precision,
   created_at timestamptz not null default now()
 );
 

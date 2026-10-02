@@ -1,7 +1,7 @@
 import { feature } from 'topojson-client'
 import type { Topology, GeometryCollection } from 'topojson-specification'
 import type { Feature, FeatureCollection, Geometry, Polygon } from 'geojson'
-import { geoArea, geoCentroid } from 'd3-geo'
+import { geoArea, geoCentroid, geoContains } from 'd3-geo'
 import world from 'world-atlas/countries-110m.json'
 
 export type CountryProps = { name: string }
@@ -38,4 +38,10 @@ for (const f of countries.features) {
 
 export function countryCenter(name: string) {
   return centers.get(name) ?? { lat: 0, lng: 0 }
+}
+
+// Which country a point falls in, or null for the ocean.
+export function countryAt(lat: number, lng: number): string | null {
+  const f = countries.features.find((c) => geoContains(c, [lng, lat]))
+  return f?.properties.name ?? null
 }

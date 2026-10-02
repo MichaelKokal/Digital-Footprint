@@ -284,3 +284,83 @@ button.link.danger {
   box-shadow: var(--shadow);
   font-size: 0.85rem;
 }
+
+.location {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.location-label {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.location-current {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.location-search {
+  display: flex;
+  gap: 6px;
+}
+
+.location-search input {
+  flex: 1;
+  min-width: 0;
+}
+
+button.secondary {
+  font: inherit;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.place-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.place-results button {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.place-results li:last-child button {
+  border-bottom: none;
+}
+
+.place-results button:hover {
+  background: #f3f1ee;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.memory-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}

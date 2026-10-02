@@ -5,6 +5,7 @@ import MemoryForm from './MemoryForm'
 type Props = {
   country: string
   userId: string
+  spot: { lat: number; lng: number }
   onClose: () => void
   onChanged: () => void
 }
@@ -21,7 +22,7 @@ function formatDate(iso: string) {
   })
 }
 
-export default function CountryPanel({ country, userId, onClose, onChanged }: Props) {
+export default function CountryPanel({ country, userId, spot, onClose, onChanged }: Props) {
   const [memories, setMemories] = useState<Memory[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
@@ -68,6 +69,7 @@ export default function CountryPanel({ country, userId, onClose, onChanged }: Pr
         <MemoryForm
           country={country}
           userId={userId}
+          spot={spot}
           onCancel={() => setAdding(false)}
           onSaved={() => {
             setAdding(false)
@@ -90,7 +92,10 @@ export default function CountryPanel({ country, userId, onClose, onChanged }: Pr
           <div className="memory-head">
             <div>
               <h3>{m.title}</h3>
-              {m.happened_on && <time>{formatDate(m.happened_on)}</time>}
+              <div className="memory-meta">
+                {m.place && <span>📍 {m.place}</span>}
+                {m.happened_on && <time>{formatDate(m.happened_on)}</time>}
+              </div>
             </div>
             <button className="link danger" onClick={() => remove(m)}>
               Delete

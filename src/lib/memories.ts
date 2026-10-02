@@ -16,6 +16,9 @@ export type Memory = {
   title: string
   note: string | null
   happened_on: string | null
+  place: string | null
+  lat: number | null
+  lng: number | null
   created_at: string
   media: Media[]
 }
@@ -25,6 +28,9 @@ export type NewMemory = {
   title: string
   note: string
   happenedOn: string
+  place: string | null
+  lat: number
+  lng: number
   files: File[]
 }
 
@@ -67,6 +73,9 @@ export async function createMemory(userId: string, input: NewMemory): Promise<vo
       title: input.title,
       note: input.note || null,
       happened_on: input.happenedOn || null,
+      place: input.place,
+      lat: input.lat,
+      lng: input.lng,
     })
     .select('id')
     .single()

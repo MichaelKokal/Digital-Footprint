@@ -51,6 +51,7 @@ export default function App() {
           <CountryPanel
             key={selected.country}
             country={selected.country}
+            spot={{ lat: selected.lat, lng: selected.lng }}
             userId={session.user.id}
             onClose={() => setSelected(null)}
             onChanged={() => setVersion((v) => v + 1)}
