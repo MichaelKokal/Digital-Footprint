@@ -364,3 +364,10 @@ button.secondary {
   font-size: 0.85rem;
   color: var(--muted);
 }
+
+.memory.focused {
+  margin: 0 -12px;
+  padding: 16px 12px;
+  border-radius: 10px;
+  background: #fdf1ec;
+}

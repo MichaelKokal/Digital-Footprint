@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { listMemories, deleteMemory, type Memory } from '../lib/memories'
 import MemoryForm from './MemoryForm'
 
@@ -6,6 +6,7 @@ type Props = {
   country: string
   userId: string
   spot: { lat: number; lng: number }
+  focusMemoryId: string | null
   onClose: () => void
   onChanged: () => void
 }
@@ -22,7 +23,14 @@ function formatDate(iso: string) {
   })
 }
 
-export default function CountryPanel({ country, userId, spot, onClose, onChanged }: Props) {
+export default function CountryPanel({
+  country,
+  userId,
+  spot,
+  focusMemoryId,
+  onClose,
+  onChanged,
+}: Props) {
   const [memories, setMemories] = useState<Memory[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
@@ -47,6 +55,15 @@ export default function CountryPanel({ country, userId, spot, onClose, onChanged
     }
   }, [country])
 
+  // Scroll to the memory whose pin was clicked, once it has loaded.
+  const panelRef = useRef<HTMLElement>(null)
+  useEffect(() => {
+    if (!focusMemoryId || !memories) return
+    panelRef.current
+      ?.querySelector(`[data-memory-id="${focusMemoryId}"]`)
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [focusMemoryId, memories])
+
   async function remove(memory: Memory) {
     if (!confirm(`Delete "${memory.title}" and its photos? This can't be undone.`)) return
     try {
@@ -59,7 +76,7 @@ export default function CountryPanel({ country, userId, spot, onClose, onChanged
   }
 
   return (
-    <aside className="country-panel">
+    <aside className="country-panel" ref={panelRef}>
       <header>
         <h2>{country}</h2>
         <button className="close" onClick={onClose} aria-label="Close">×</button>
@@ -88,7 +105,11 @@ export default function CountryPanel({ country, userId, spot, onClose, onChanged
       {memories?.length === 0 && !adding && <p className="empty">No memories here yet.</p>}
 
       {memories?.map((m) => (
-        <article key={m.id} className="memory">
+        <article
+          key={m.id}
+          data-memory-id={m.id}
+          className={m.id === focusMemoryId ? 'memory focused' : 'memory'}
+        >
           <div className="memory-head">
             <div>
               <h3>{m.title}</h3>

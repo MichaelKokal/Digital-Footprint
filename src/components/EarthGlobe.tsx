@@ -1,14 +1,27 @@
 import { useEffect, useRef, useState } from 'react'
 import Globe, { type GlobeMethods } from 'react-globe.gl'
-import { countries, countryCenter, type CountryFeature } from '../data/countries'
+import { Mesh, MeshLambertMaterial, SphereGeometry } from 'three'
+import { countries, type CountryFeature } from '../data/countries'
+import type { Pin } from '../lib/memories'
 
 export type GlobeClick = { country: string; lat: number; lng: number }
 
 type Props = {
   selected: string | null
+  // Where the globe should turn to face.
+  focus: { lat: number; lng: number } | null
   counts: Map<string, number>
+  pins: Pin[]
   onSelect: (click: GlobeClick) => void
+  onPinClick: (pin: Pin) => void
 }
+
+const PIN_HEIGHT = 0.06
+const PIN_COLOR = '#e4572e'
+
+// One shared shape for every pin head keeps the globe fast with many pins.
+const pinHeadGeometry = new SphereGeometry(0.9, 16, 16)
+const pinHeadMaterial = new MeshLambertMaterial({ color: PIN_COLOR })
 
 const COLORS = {
   base: 'rgba(255, 255, 255, 0.03)',
@@ -40,7 +53,19 @@ function useSize<T extends HTMLElement>() {
   return [ref, size] as const
 }
 
-export default function EarthGlobe({ selected, counts, onSelect }: Props) {
+function pinLabel(pin: Pin) {
+  const where = pin.place ? `<br><small>${escapeHtml(pin.place)}</small>` : ''
+  return `<div class="globe-label"><strong>${escapeHtml(pin.title)}</strong>${where}</div>`
+}
+
+export default function EarthGlobe({
+  selected,
+  focus,
+  counts,
+  pins,
+  onSelect,
+  onPinClick,
+}: Props) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [containerRef, size] = useSize<HTMLDivElement>()
   const [hovered, setHovered] = useState<CountryFeature | null>(null)
@@ -55,13 +80,12 @@ export default function EarthGlobe({ selected, counts, onSelect }: Props) {
     globeRef.current?.pointOfView({ altitude: 2.2 })
   }
 
-  // Turn the globe to face the chosen country.
+  // Turn the globe to face the chosen country or pin.
   useEffect(() => {
-    if (!selected || !globeRef.current) return
-    const { lat, lng } = countryCenter(selected)
+    if (!focus || !globeRef.current) return
     globeRef.current.controls().autoRotate = false
-    globeRef.current.pointOfView({ lat, lng, altitude: 1.6 }, 1000)
-  }, [selected])
+    globeRef.current.pointOfView({ lat: focus.lat, lng: focus.lng, altitude: 1.6 }, 1000)
+  }, [focus])
 
   const capColor = (f: CountryFeature) => {
     const name = f.properties.name
@@ -103,6 +127,24 @@ export default function EarthGlobe({ selected, counts, onSelect }: Props) {
           onPolygonClick={(d, _event, { lat, lng }) =>
             onSelect({ country: (d as CountryFeature).properties.name, lat, lng })
           }
+          // Pin sticks
+          pointsData={pins}
+          pointLat="lat"
+          pointLng="lng"
+          pointAltitude={PIN_HEIGHT}
+          pointRadius={0.12}
+          pointColor={() => '#f2f4f8'}
+          pointsTransitionDuration={0}
+          pointLabel={(d) => pinLabel(d as Pin)}
+          onPointClick={(d) => onPinClick(d as Pin)}
+          // Pin heads
+          objectsData={pins}
+          objectLat="lat"
+          objectLng="lng"
+          objectAltitude={PIN_HEIGHT}
+          objectThreeObject={() => new Mesh(pinHeadGeometry, pinHeadMaterial)}
+          objectLabel={(d) => pinLabel(d as Pin)}
+          onObjectClick={(d) => onPinClick(d as Pin)}
         />
       )}
     </div>

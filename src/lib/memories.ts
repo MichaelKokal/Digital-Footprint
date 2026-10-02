@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { countryCenter } from '../data/countries'
 
 const BUCKET = 'memories'
 const URL_LIFETIME_SECONDS = 60 * 60
@@ -120,11 +121,42 @@ export async function deleteMemory(memory: Memory): Promise<void> {
   if (error) throw error
 }
 
-// How many memories you have in each country, for coloring the map.
-export async function countMemoriesByCountry(): Promise<Map<string, number>> {
-  const { data, error } = await supabase.from('memories').select('country')
+export type Pin = {
+  id: string
+  country: string
+  title: string
+  place: string | null
+  lat: number
+  lng: number
+}
+
+// Every memory's location, for drawing pins on the globe.
+export async function listPins(): Promise<Pin[]> {
+  const { data, error } = await supabase
+    .from('memories')
+    .select('id, country, title, place, lat, lng')
   if (error) throw error
-  const counts = new Map<string, number>()
-  for (const { country } of data) counts.set(country, (counts.get(country) ?? 0) + 1)
-  return counts
+  const pins = data.map((m) => {
+    // Memories saved before locations existed sit in the middle of their country.
+    const spot = m.lat != null && m.lng != null ? { lat: m.lat, lng: m.lng } : countryCenter(m.country)
+    return { ...m, ...spot } as Pin
+  })
+  return spreadOverlapping(pins)
+}
+
+// Pins at exactly the same spot are fanned out in a small circle so each can be clicked.
+function spreadOverlapping(pins: Pin[]): Pin[] {
+  const groups = new Map<string, Pin[]>()
+  for (const p of pins) {
+    const key = `${p.lat.toFixed(4)},${p.lng.toFixed(4)}`
+    groups.set(key, [...(groups.get(key) ?? []), p])
+  }
+  return [...groups.values()].flatMap((group) =>
+    group.length === 1
+      ? group
+      : group.map((p, i) => {
+          const angle = (2 * Math.PI * i) / group.length
+          return { ...p, lat: p.lat + 0.5 * Math.sin(angle), lng: p.lng + 0.5 * Math.cos(angle) }
+        }),
+  )
 }
