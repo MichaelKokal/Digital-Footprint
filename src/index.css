@@ -298,12 +298,6 @@ body,
   .visited-badge {
     bottom: calc(16px + env(safe-area-inset-bottom));
   }
-  /* iPhones zoom in on text boxes with text smaller than 16px. */
-  input,
-  textarea,
-  select {
-    font-size: 16px;
-  }
   /* Logo, title and both buttons have to share one narrow row. */
   .top-bar h1 {
     font-size: 1.15rem;
@@ -1369,5 +1363,17 @@ button.secondary {
   }
   .trips-panel .panel-head {
     padding-top: 16px;
+  }
+}
+
+/* iPhones zoom the whole page in when you tap a text box whose text is
+   smaller than 16px, and it stays zoomed afterwards. This must stay at the
+   end of the file so no later rule shrinks the text again. */
+@media (max-width: 600px) {
+  input,
+  textarea,
+  select,
+  .globe-search input {
+    font-size: 16px;
   }
 }
