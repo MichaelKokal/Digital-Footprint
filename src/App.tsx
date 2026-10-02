@@ -4,6 +4,7 @@ import CountryPanel from './components/CountryPanel'
 import SignIn from './components/SignIn'
 import GlobeSearch from './components/GlobeSearch'
 import TripsPanel from './components/TripsPanel'
+import BrandMark from './components/BrandMark'
 import { supabase, isConfigured } from './lib/supabase'
 import { useSession } from './lib/useSession'
 import { listPins, type Pin } from './lib/memories'
@@ -135,8 +136,14 @@ export default function App() {
     <div className="app">
       <header className="top-bar">
         <div className="brand">
-          <h1>Digital Footprint</h1>
-          <p>Spin the globe and click a country to see your memories there.</p>
+          <BrandMark />
+          <div>
+            <h1>
+              <span className="brand-digital">Digital</span>{' '}
+              <span className="brand-footprint">Footprint</span>
+            </h1>
+            <p>Spin the globe and click a country to see your memories there.</p>
+          </div>
         </div>
         {session && (
           <GlobeSearch
