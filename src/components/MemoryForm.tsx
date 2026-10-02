@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type DragEvent, type FormEvent } from 'react'
 import { createPortal } from 'react-dom'
-import { createMemory } from '../lib/memories'
+import { createMemory, type UploadProgress } from '../lib/memories'
 import { searchPlaces, type Place } from '../lib/places'
 import { countryAt } from '../data/countries'
 import { errorText } from '../lib/errors'
@@ -61,6 +61,7 @@ export default function MemoryForm({ country, userId, spot, onSaved, onCancel }:
   const [results, setResults] = useState<Place[] | null>(null)
   const [searching, setSearching] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [progress, setProgress] = useState<UploadProgress | null>(null)
   const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -111,22 +112,28 @@ export default function MemoryForm({ country, userId, spot, onSaved, onCancel }:
       return
     }
     setBusy(true)
+    setProgress(null)
     setError(null)
     try {
-      await createMemory(userId, {
-        country: saveCountry,
-        title,
-        note,
-        happenedOn,
-        place: location.label || null,
-        lat: location.lat,
-        lng: location.lng,
-        files,
-      })
+      await createMemory(
+        userId,
+        {
+          country: saveCountry,
+          title,
+          note,
+          happenedOn,
+          place: location.label || null,
+          lat: location.lat,
+          lng: location.lng,
+          files,
+        },
+        setProgress,
+      )
       onSaved()
     } catch (err) {
       setError(errorText(err, 'Something went wrong.'))
       setBusy(false)
+      setProgress(null)
     }
   }
 
@@ -265,6 +272,26 @@ export default function MemoryForm({ country, userId, spot, onSaved, onCancel }:
           </label>
 
           {error && <p className="form-message error">{error}</p>}
+          {busy && files.length > 0 && (
+            <div className="upload-progress" role="status">
+              <div className="upload-progress-text">
+                <span>
+                  {progress
+                    ? progress.fraction >= 1
+                      ? 'Finishing up…'
+                      : `Uploading ${progress.current} of ${progress.total}`
+                    : 'Getting ready…'}
+                </span>
+                <span>{Math.round((progress?.fraction ?? 0) * 100)}%</span>
+              </div>
+              <div className="upload-progress-track">
+                <div
+                  className="upload-progress-bar"
+                  style={{ width: `${(progress?.fraction ?? 0) * 100}%` }}
+                />
+              </div>
+            </div>
+          )}
           <div className="form-actions">
             <button type="button" className="link" onClick={onCancel} disabled={busy}>
               Cancel

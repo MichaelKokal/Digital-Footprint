@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabaseKey, supabaseUrl } from './supabase'
 import { countryCenter } from '../data/countries'
 
 const BUCKET = 'memories'
@@ -66,7 +66,50 @@ export async function listMemories(country: string): Promise<Memory[]> {
   }))
 }
 
-export async function createMemory(userId: string, input: NewMemory): Promise<void> {
+export type UploadProgress = {
+  // Which file is uploading now (1-based) out of how many.
+  current: number
+  total: number
+  // Share of all bytes uploaded so far, from 0 to 1.
+  fraction: number
+}
+
+// Uploads one file straight to Supabase Storage, reporting bytes as they go.
+// (The Supabase library's own upload can't report progress partway through.)
+async function uploadWithProgress(path: string, file: File, onBytes: (sent: number) => void) {
+  const { data } = await supabase.auth.getSession()
+  const token = data.session?.access_token
+  if (!token) throw new Error('You are signed out. Please sign in again.')
+
+  const encodedPath = path.split('/').map(encodeURIComponent).join('/')
+  await new Promise<void>((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open('POST', `${supabaseUrl}/storage/v1/object/${BUCKET}/${encodedPath}`)
+    xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    xhr.setRequestHeader('apikey', supabaseKey)
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream')
+    xhr.setRequestHeader('x-upsert', 'false')
+    xhr.upload.onprogress = (e) => onBytes(e.loaded)
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) return resolve()
+      let message = `Upload of "${file.name}" failed.`
+      try {
+        message = JSON.parse(xhr.responseText).message ?? message
+      } catch {
+        // Keep the general message.
+      }
+      reject(new Error(message))
+    }
+    xhr.onerror = () => reject(new Error(`Upload of "${file.name}" failed. Check your connection.`))
+    xhr.send(file)
+  })
+}
+
+export async function createMemory(
+  userId: string,
+  input: NewMemory,
+  onProgress?: (progress: UploadProgress) => void,
+): Promise<void> {
   const { data: memory, error } = await supabase
     .from('memories')
     .insert({
@@ -83,14 +126,20 @@ export async function createMemory(userId: string, input: NewMemory): Promise<vo
   if (error) throw error
 
   const uploaded: string[] = []
+  const totalBytes = input.files.reduce((sum, f) => sum + f.size, 0) || 1
+  let doneBytes = 0
   try {
-    for (const file of input.files) {
+    for (const [i, file] of input.files.entries()) {
       const ext = file.name.includes('.') ? file.name.split('.').pop() : 'bin'
       const path = `${userId}/${memory.id}/${crypto.randomUUID()}.${ext}`
-      const { error: uploadError } = await supabase.storage
-        .from(BUCKET)
-        .upload(path, file, { contentType: file.type })
-      if (uploadError) throw uploadError
+      await uploadWithProgress(path, file, (sent) =>
+        onProgress?.({
+          current: i + 1,
+          total: input.files.length,
+          fraction: Math.min(1, (doneBytes + sent) / totalBytes),
+        }),
+      )
+      doneBytes += file.size
       uploaded.push(path)
     }
     if (uploaded.length > 0) {
