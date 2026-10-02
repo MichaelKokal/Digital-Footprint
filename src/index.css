@@ -83,7 +83,7 @@ body,
   margin: 0;
 }
 
-.country-panel button {
+.country-panel .close {
   border: none;
   background: none;
   font-size: 1.6rem;
@@ -189,4 +189,75 @@ button.link {
 .form-message {
   margin: 0;
   font-size: 0.9rem;
+}
+
+.add-memory {
+  width: 100%;
+  margin: 16px 0 8px;
+}
+
+.memory-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+}
+
+.form-message.error,
+button.link.danger {
+  color: #b42318;
+}
+
+.memory {
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+
+.memory-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.memory h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.memory time {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.memory .note {
+  white-space: pre-wrap;
+  margin: 8px 0;
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.media-grid img,
+.media-grid video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #000;
 }

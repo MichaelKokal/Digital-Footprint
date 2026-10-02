@@ -26,7 +26,13 @@ export default function App() {
       <main className="map-area">
         <WorldMap selected={selected} onSelect={setSelected} />
         {selected && (
-          <CountryPanel country={selected} onClose={() => setSelected(null)} />
+          <CountryPanel
+            key={selected}
+            country={selected}
+            userId={session.user.id}
+            onClose={() => setSelected(null)}
+            onChanged={() => {}}
+          />
         )}
       </main>
     )
