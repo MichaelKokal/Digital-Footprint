@@ -793,3 +793,34 @@ button.secondary {
   background: linear-gradient(90deg, #e4572e, #f4a259);
   transition: width 0.2s ease-out;
 }
+
+.viewer-stage video {
+  width: min(100%, 1200px);
+  background: #000;
+}
+
+.viewer-error {
+  max-width: 420px;
+  padding: 24px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  text-align: center;
+}
+
+.viewer-error p {
+  margin: 0 0 8px;
+}
+
+.viewer-error .hint {
+  color: #9aa3b5;
+  margin-bottom: 16px;
+}
+
+.viewer-error a.secondary {
+  display: inline-block;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #e4572e;
+  color: #fff;
+  text-decoration: none;
+}
