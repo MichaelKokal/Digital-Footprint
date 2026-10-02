@@ -90,9 +90,10 @@ body,
   font-size: 0.85rem;
 }
 
-/* Dark colors shared by the panel and the add-memory pop-up. */
+/* Dark colors shared by the panels, the add-memory pop-up and sign-in. */
 .country-panel,
-.dialog {
+.dialog,
+.sign-in form {
   --surface: rgba(255, 255, 255, 0.06);
   --text: #eef1f6;
   --muted: #9aa3b5;
@@ -328,27 +329,46 @@ body,
   text-align: center;
 }
 
+/* The sign-in box floats over a slowly spinning globe. */
 .sign-in {
-  flex: 1;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 16px;
+  background: radial-gradient(circle at center, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.55));
 }
 
 .sign-in form {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  width: min(360px, 100%);
-  padding: 24px;
-  background: var(--surface);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
+  width: min(370px, 100%);
+  padding: 28px;
+  background: rgba(12, 16, 28, 0.7);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  animation: rise-in 0.4s ease-out;
 }
 
-.sign-in h2 {
+.sign-in-heading h2 {
   margin: 0;
+  font-size: 1.5rem;
+}
+
+.sign-in-heading p {
+  margin: 4px 0 4px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.globe.decorative {
+  pointer-events: none;
 }
 
 label {

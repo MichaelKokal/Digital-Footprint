@@ -29,7 +29,10 @@ export default function SignIn() {
   return (
     <div className="sign-in">
       <form onSubmit={submit}>
-        <h2>{mode === 'signin' ? 'Sign in' : 'Create an account'}</h2>
+        <div className="sign-in-heading">
+          <h2>{mode === 'signin' ? 'Welcome back' : 'Create your account'}</h2>
+          <p>Leave your memories where they happened.</p>
+        </div>
         <label>
           Email
           <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />

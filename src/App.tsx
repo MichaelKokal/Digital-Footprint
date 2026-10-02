@@ -10,6 +10,10 @@ import { listPins, type Pin } from './lib/memories'
 import { isPhoneLayout } from './lib/device'
 import { countryCenter } from './data/countries'
 
+// Shared empty values for the sign-in page's globe, so it isn't redrawn on every keystroke.
+const NO_COUNTS = new Map<string, number>()
+const NO_PINS: Pin[] = []
+
 export default function App() {
   const { session, loading } = useSession()
   const [selected, setSelected] = useState<GlobeClick | null>(null)
@@ -64,7 +68,22 @@ export default function App() {
   } else if (loading) {
     content = <div className="notice">Loading…</div>
   } else if (!session) {
-    content = <SignIn />
+    content = (
+      <main className="map-area">
+        <EarthGlobe
+          decorative
+          selected={null}
+          focus={null}
+          counts={NO_COUNTS}
+          pins={NO_PINS}
+          activePinId={null}
+          onSelect={() => {}}
+          onPinClick={() => {}}
+          onOceanClick={() => {}}
+        />
+        <SignIn />
+      </main>
+    )
   } else {
     content = (
       <main className="map-area">

@@ -25,6 +25,8 @@ type Props = {
   onPinClick: (pin: Pin) => void
   // Clicks on the globe that miss every country (the ocean).
   onOceanClick: () => void
+  // Just for show (behind the sign-in page): spins, but ignores the mouse.
+  decorative?: boolean
 }
 
 const PIN_HEIGHT = 0.06
@@ -100,6 +102,7 @@ export default function EarthGlobe({
   onSelect,
   onPinClick,
   onOceanClick,
+  decorative = false,
 }: Props) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [containerRef, size] = useSize<HTMLDivElement>()
@@ -150,7 +153,7 @@ export default function EarthGlobe({
     const controls = globeRef.current?.controls()
     if (!controls) return
     controls.autoRotate = true
-    controls.autoRotateSpeed = 0.4
+    controls.autoRotateSpeed = decorative ? 0.6 : 0.4
     controls.addEventListener('start', () => (controls.autoRotate = false))
     globeRef.current?.pointOfView({ altitude: 2.2 })
   }
@@ -171,13 +174,14 @@ export default function EarthGlobe({
   }
 
   return (
-    <div ref={containerRef} className="globe">
+    <div ref={containerRef} className={decorative ? 'globe decorative' : 'globe'}>
       {size.width > 0 && (
         <Globe
           ref={globeRef}
           width={size.width}
           height={size.height}
           onGlobeReady={onGlobeReady}
+          enablePointerInteraction={!decorative}
           globeImageUrl="/textures/earth-blue-marble.jpg"
           bumpImageUrl="/textures/earth-topology.png"
           backgroundImageUrl="/textures/night-sky.png"
