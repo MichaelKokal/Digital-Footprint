@@ -3,6 +3,7 @@ import EarthGlobe, { type GlobeClick } from './components/EarthGlobe'
 import CountryPanel from './components/CountryPanel'
 import SignIn from './components/SignIn'
 import GlobeSearch from './components/GlobeSearch'
+import TripsPanel from './components/TripsPanel'
 import { supabase, isConfigured } from './lib/supabase'
 import { useSession } from './lib/useSession'
 import { listPins, type Pin } from './lib/memories'
@@ -15,6 +16,7 @@ export default function App() {
   // The memory to scroll to when a pin is clicked.
   const [focusMemoryId, setFocusMemoryId] = useState<string | null>(null)
   const [pins, setPins] = useState<Pin[]>([])
+  const [showTrips, setShowTrips] = useState(false)
   // Bumped whenever memories are added or deleted, so the globe recolors.
   const [version, setVersion] = useState(0)
   const userId = session?.user.id
@@ -78,7 +80,19 @@ export default function App() {
           // the ocean is a quick way to close it.
           onOceanClick={() => isPhoneLayout() && setSelected(null)}
         />
-        {counts.size > 0 && (
+        {showTrips && (
+          <TripsPanel
+            pins={pins}
+            activeId={focusMemoryId}
+            onPick={(pin) => {
+              selectPin(pin)
+              // On phones the memory's panel takes the same spot, so step aside.
+              if (isPhoneLayout()) setShowTrips(false)
+            }}
+            onClose={() => setShowTrips(false)}
+          />
+        )}
+        {counts.size > 0 && !showTrips && (
           <div className="visited-badge">
             {counts.size} {counts.size === 1 ? 'country' : 'countries'} visited
           </div>
@@ -114,16 +128,25 @@ export default function App() {
           />
         )}
         {session && (
-          <button
-            className="sign-out"
-            onClick={() => {
-              setSelected(null)
-              setPins([])
-              supabase.auth.signOut()
-            }}
-          >
-            Sign out
-          </button>
+          <div className="top-actions">
+            <button
+              className={showTrips ? 'pill-button active' : 'pill-button'}
+              onClick={() => setShowTrips(!showTrips)}
+            >
+              My trips
+            </button>
+            <button
+              className="pill-button"
+              onClick={() => {
+                setSelected(null)
+                setShowTrips(false)
+                setPins([])
+                supabase.auth.signOut()
+              }}
+            >
+              Sign out
+            </button>
+          </div>
         )}
       </header>
       {content}

@@ -287,7 +287,7 @@ body,
   }
 }
 
-.sign-out,
+.pill-button,
 .visited-badge {
   padding: 7px 14px;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -300,13 +300,24 @@ body,
   font-size: 0.85rem;
 }
 
-.sign-out {
+.pill-button {
   cursor: pointer;
-  transition: background 0.2s;
+  white-space: nowrap;
+  transition: background 0.2s, border-color 0.2s;
 }
 
-.sign-out:hover {
+.pill-button:hover {
   background: rgba(255, 255, 255, 0.14);
+}
+
+.pill-button.active {
+  border-color: var(--accent);
+  background: rgba(228, 87, 46, 0.25);
+}
+
+.top-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .notice {
@@ -1150,5 +1161,108 @@ button.secondary {
     order: 3;
     flex: 1 1 100%;
     margin-left: 0;
+  }
+}
+
+/* My trips: the same glass panel, on the left side on computers. */
+.trips-panel {
+  left: 16px;
+  right: auto;
+  width: min(330px, calc(100% - 32px));
+}
+
+.trips-summary {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.trip-year h3 {
+  margin: 14px 0 6px;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.trip-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-left: 2px solid var(--border);
+}
+
+.trip {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 10px 8px 16px;
+  border: none;
+  border-radius: 0 10px 10px 0;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* A dot on the timeline line for each memory. */
+.trip::before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 14px;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #3a4256;
+  border: 2px solid rgba(12, 16, 28, 0.9);
+}
+
+.trip:hover {
+  background: var(--hover);
+}
+
+.trip.active {
+  background: rgba(228, 87, 46, 0.16);
+}
+
+.trip.active::before {
+  background: var(--accent);
+}
+
+.trip-date {
+  flex: 0 0 52px;
+  padding-top: 2px;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.trip-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.trip-title {
+  font-weight: 600;
+}
+
+.trip-place {
+  font-size: 0.82rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 600px) {
+  .trips-panel {
+    left: 0;
+    right: 0;
+    width: auto;
+  }
+  .trips-panel .panel-head {
+    padding-top: 16px;
   }
 }

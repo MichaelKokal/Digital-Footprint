@@ -175,6 +175,8 @@ export type Pin = {
   country: string
   title: string
   place: string | null
+  happened_on: string | null
+  created_at: string
   lat: number
   lng: number
 }
@@ -183,7 +185,7 @@ export type Pin = {
 export async function listPins(): Promise<Pin[]> {
   const { data, error } = await supabase
     .from('memories')
-    .select('id, country, title, place, lat, lng')
+    .select('id, country, title, place, happened_on, created_at, lat, lng')
   if (error) throw error
   const pins = data.map((m) => {
     // Memories saved before locations existed sit in the middle of their country.
