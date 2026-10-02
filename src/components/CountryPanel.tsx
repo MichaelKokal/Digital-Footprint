@@ -58,7 +58,8 @@ export default function CountryPanel({
     if (!focusMemoryId || !memories) return
     panelRef.current
       ?.querySelector(`[data-memory-id="${focusMemoryId}"]`)
-      ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      // "inline" matters on phones, where the cards sit side by side.
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'center' })
   }, [focusMemoryId, memories])
 
   // On phones the panel is a sheet with two sizes: half the screen, or
@@ -96,6 +97,27 @@ export default function CountryPanel({
     } else if (d.dy > SWIPE_CLOSE_DISTANCE) {
       onClose()
     }
+  }
+
+  // On phones the memories form a row you swipe through; the dots
+  // underneath track which one is showing.
+  const listRef = useRef<HTMLDivElement>(null)
+  const [activeCard, setActiveCard] = useState(0)
+
+  function onListScroll() {
+    const el = listRef.current
+    const count = memories?.length ?? 0
+    const maxScroll = el ? el.scrollWidth - el.clientWidth : 0
+    if (!el || count < 2 || maxScroll <= 0) return
+    setActiveCard(Math.round((el.scrollLeft / maxScroll) * (count - 1)))
+  }
+
+  function showCard(index: number) {
+    listRef.current?.children[index]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    })
   }
 
   async function remove(memory: Memory) {
@@ -168,7 +190,7 @@ export default function CountryPanel({
       {memories === null && !error && <p className="empty">Loading…</p>}
       {memories?.length === 0 && <p className="empty">No memories here yet.</p>}
 
-      <div className="memory-list">
+      <div className="memory-list" ref={listRef} onScroll={onListScroll}>
         {memories?.map((m) => (
           <MemoryCard
             key={m.id}
@@ -179,6 +201,19 @@ export default function CountryPanel({
           />
         ))}
       </div>
+
+      {memories && memories.length > 1 && (
+        <div className="carousel-dots">
+          {memories.map((m, i) => (
+            <button
+              key={m.id}
+              className={i === activeCard ? 'dot active' : 'dot'}
+              onClick={() => showCard(i)}
+              aria-label={`Show memory ${i + 1} of ${memories.length}`}
+            />
+          ))}
+        </div>
+      )}
 
       {viewing && (
         <MediaViewer

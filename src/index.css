@@ -988,3 +988,54 @@ button.secondary {
     bottom: calc(16px + env(safe-area-inset-bottom));
   }
 }
+
+.carousel-dots {
+  display: none;
+}
+
+/* On phones, memories sit side by side and snap into place as you swipe. */
+@media (max-width: 600px) {
+  .memory-list {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 8px -16px 0;
+    padding: 0 16px 4px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 16px;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  .memory-list::-webkit-scrollbar {
+    display: none;
+  }
+  .memory-card {
+    flex: 0 0 86%;
+    scroll-snap-align: center;
+  }
+  .memory-card:only-child {
+    flex-basis: 100%;
+  }
+  .carousel-dots {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 12px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.25);
+    cursor: pointer;
+    transition: width 0.2s, background 0.2s;
+  }
+  .dot.active {
+    width: 18px;
+    background: var(--accent);
+  }
+}
