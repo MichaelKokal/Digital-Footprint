@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { listMemories, deleteMemory, type Memory } from '../lib/memories'
 import MemoryForm from './MemoryForm'
+import MediaViewer from './MediaViewer'
 
 type Props = {
   country: string
@@ -34,6 +35,7 @@ export default function CountryPanel({
   const [memories, setMemories] = useState<Memory[] | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
+  const [viewing, setViewing] = useState<{ memory: Memory; index: number } | null>(null)
 
   const load = useCallback(async () => {
     setError(null)
@@ -125,19 +127,39 @@ export default function CountryPanel({
           {m.note && <p className="note">{m.note}</p>}
           {m.media.length > 0 && (
             <div className="media-grid">
-              {m.media.map((item) =>
-                !item.url ? null : item.kind === 'video' ? (
-                  <video key={item.id} src={item.url} controls preload="metadata" />
-                ) : (
-                  <a key={item.id} href={item.url} target="_blank" rel="noreferrer">
-                    <img src={item.url} alt={m.title} loading="lazy" />
-                  </a>
+              {m.media.map((item, i) =>
+                !item.url ? null : (
+                  <button
+                    key={item.id}
+                    className="media-thumb"
+                    aria-label={`Open ${item.kind} ${i + 1}`}
+                    onClick={() => setViewing({ memory: m, index: i })}
+                  >
+                    {item.kind === 'video' ? (
+                      <>
+                        <video src={item.url} muted preload="metadata" />
+                        <span className="play-icon">▶</span>
+                      </>
+                    ) : (
+                      <img src={item.url} alt={m.title} loading="lazy" />
+                    )}
+                  </button>
                 ),
               )}
             </div>
           )}
         </article>
       ))}
+
+      {viewing && (
+        <MediaViewer
+          items={viewing.memory.media}
+          index={viewing.index}
+          title={viewing.memory.title}
+          onIndexChange={(index) => setViewing({ ...viewing, index })}
+          onClose={() => setViewing(null)}
+        />
+      )}
     </aside>
   )
 }
