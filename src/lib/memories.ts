@@ -110,3 +110,12 @@ export async function deleteMemory(memory: Memory): Promise<void> {
   const { error } = await supabase.from('memories').delete().eq('id', memory.id)
   if (error) throw error
 }
+
+// How many memories you have in each country, for coloring the map.
+export async function countMemoriesByCountry(): Promise<Map<string, number>> {
+  const { data, error } = await supabase.from('memories').select('country')
+  if (error) throw error
+  const counts = new Map<string, number>()
+  for (const { country } of data) counts.set(country, (counts.get(country) ?? 0) + 1)
+  return counts
+}

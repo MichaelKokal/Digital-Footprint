@@ -7,8 +7,11 @@ import { countries, type CountryProps } from '../data/countries'
 
 type Props = {
   selected: string | null
+  counts: Map<string, number>
   onSelect: (name: string) => void
 }
+
+type CountryLayer = Path & { feature: Feature<Geometry, CountryProps> }
 
 const baseStyle: PathOptions = {
   color: '#5b6b7a',
@@ -16,7 +19,8 @@ const baseStyle: PathOptions = {
   fillColor: '#9fb7c9',
   fillOpacity: 0.25,
 }
-const hoverStyle: PathOptions = { fillOpacity: 0.5, weight: 1.5 }
+const visitedStyle: PathOptions = { fillColor: '#2a9d8f', fillOpacity: 0.55 }
+const hoverStyle: PathOptions = { fillOpacity: 0.7, weight: 1.5 }
 const selectedStyle: PathOptions = {
   fillColor: '#e4572e',
   fillOpacity: 0.6,
@@ -24,25 +28,36 @@ const selectedStyle: PathOptions = {
   weight: 2,
 }
 
-export default function WorldMap({ selected, onSelect }: Props) {
-  const layerRef = useRef<LeafletGeoJSON | null>(null)
-  // Leaflet event handlers are bound once, so they read the latest selection from a ref.
-  const selectedRef = useRef(selected)
+function tooltipText(name: string, count: number) {
+  if (count === 0) return name
+  return `${name} · ${count} ${count === 1 ? 'memory' : 'memories'}`
+}
 
-  const styleFor = (name: string): PathOptions =>
-    name === selectedRef.current ? { ...baseStyle, ...selectedStyle } : baseStyle
+export default function WorldMap({ selected, counts, onSelect }: Props) {
+  const layerRef = useRef<LeafletGeoJSON | null>(null)
+  // Leaflet event handlers are bound once, so they read the latest values from refs.
+  const selectedRef = useRef(selected)
+  const countsRef = useRef(counts)
+
+  const styleFor = (name: string): PathOptions => {
+    if (name === selectedRef.current) return { ...baseStyle, ...selectedStyle }
+    if (countsRef.current.has(name)) return { ...baseStyle, ...visitedStyle }
+    return baseStyle
+  }
 
   useEffect(() => {
     selectedRef.current = selected
+    countsRef.current = counts
     layerRef.current?.eachLayer((layer) => {
-      const f = (layer as Layer & { feature: Feature<Geometry, CountryProps> }).feature
-      ;(layer as Path).setStyle(styleFor(f.properties.name))
+      const name = (layer as CountryLayer).feature.properties.name
+      ;(layer as CountryLayer).setStyle(styleFor(name))
+      layer.setTooltipContent(tooltipText(name, counts.get(name) ?? 0))
     })
-  }, [selected])
+  }, [selected, counts])
 
   const onEachCountry = (f: Feature<Geometry, CountryProps>, layer: Layer) => {
     const name = f.properties.name
-    layer.bindTooltip(name, { sticky: true })
+    layer.bindTooltip(tooltipText(name, countsRef.current.get(name) ?? 0), { sticky: true })
     layer.on({
       mouseover: () => (layer as Path).setStyle({ ...styleFor(name), ...hoverStyle }),
       mouseout: () => (layer as Path).setStyle(styleFor(name)),

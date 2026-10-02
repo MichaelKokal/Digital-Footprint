@@ -261,3 +261,15 @@ button.link.danger {
   border-radius: 6px;
   background: #000;
 }
+
+.visited-badge {
+  position: absolute;
+  left: 56px;
+  top: 12px;
+  z-index: 1000;
+  padding: 6px 12px;
+  background: var(--surface);
+  border-radius: 999px;
+  box-shadow: var(--shadow);
+  font-size: 0.85rem;
+}
