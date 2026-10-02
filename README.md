@@ -1,6 +1,8 @@
 # Digital Footprint
 Leave your memories where they happened. Digital Footprint is a global interactive map where you can pin, explore, and revisit memories from anywhere in the world.
 
+**Try it live: [digital-footprint-murex.vercel.app](https://digital-footprint-murex.vercel.app)**
+
 ## Features
 
 - **Spinning 3D globe** – drag to turn the Earth, scroll to zoom, and click any country.
