@@ -5,6 +5,7 @@ import SignIn from './components/SignIn'
 import { supabase, isConfigured } from './lib/supabase'
 import { useSession } from './lib/useSession'
 import { listPins, type Pin } from './lib/memories'
+import { isPhoneLayout } from './lib/device'
 
 export default function App() {
   const { session, loading } = useSession()
@@ -67,6 +68,9 @@ export default function App() {
           activePinId={focusMemoryId}
           onSelect={selectCountry}
           onPinClick={selectPin}
+          // On phones the panel covers much of the screen, so tapping
+          // the ocean is a quick way to close it.
+          onOceanClick={() => isPhoneLayout() && setSelected(null)}
         />
         {counts.size > 0 && (
           <div className="visited-badge">

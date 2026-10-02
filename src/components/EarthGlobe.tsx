@@ -23,6 +23,8 @@ type Props = {
   activePinId: string | null
   onSelect: (click: GlobeClick) => void
   onPinClick: (pin: Pin) => void
+  // Clicks on the globe that miss every country (the ocean).
+  onOceanClick: () => void
 }
 
 const PIN_HEIGHT = 0.06
@@ -97,6 +99,7 @@ export default function EarthGlobe({
   activePinId,
   onSelect,
   onPinClick,
+  onOceanClick,
 }: Props) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [containerRef, size] = useSize<HTMLDivElement>()
@@ -195,6 +198,7 @@ export default function EarthGlobe({
             const extra = count ? ` · ${count} ${count === 1 ? 'memory' : 'memories'}` : ''
             return `<div class="globe-label">${escapeHtml(name)}${extra}</div>`
           }}
+          onGlobeClick={onOceanClick}
           onPolygonHover={(d) => setHovered(d as CountryFeature | null)}
           onPolygonClick={(d, _event, { lat, lng }) =>
             onSelect({ country: (d as CountryFeature).properties.name, lat, lng })

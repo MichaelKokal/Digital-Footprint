@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
 import { listMemories, deleteMemory, type Memory } from '../lib/memories'
 import MemoryForm from './MemoryForm'
 import MediaViewer from './MediaViewer'
 import MemoryCard from './MemoryCard'
 import { errorText } from '../lib/errors'
+import { isPhoneLayout } from '../lib/device'
+
+// How far the panel must be dragged down (in pixels) before it closes.
+const SWIPE_CLOSE_DISTANCE = 90
 
 type Props = {
   country: string
@@ -56,6 +60,24 @@ export default function CountryPanel({
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [focusMemoryId, memories])
 
+  // On phones, dragging the panel's header downward slides it away.
+  const [dragY, setDragY] = useState(0)
+  const dragStart = useRef<number | null>(null)
+
+  function onTouchStart(e: TouchEvent) {
+    if (isPhoneLayout()) dragStart.current = e.touches[0].clientY
+  }
+  function onTouchMove(e: TouchEvent) {
+    if (dragStart.current === null) return
+    setDragY(Math.max(0, e.touches[0].clientY - dragStart.current))
+  }
+  function onTouchEnd() {
+    if (dragStart.current === null) return
+    dragStart.current = null
+    if (dragY > SWIPE_CLOSE_DISTANCE) onClose()
+    else setDragY(0)
+  }
+
   async function remove(memory: Memory) {
     if (!confirm(`Delete "${memory.title}" and its photos? This can't be undone.`)) return
     try {
@@ -68,10 +90,37 @@ export default function CountryPanel({
   }
 
   return (
-    <aside className="country-panel" ref={panelRef}>
-      <header>
-        <h2>{country}</h2>
-        <button className="close" onClick={onClose} aria-label="Close">×</button>
+    <aside
+      className="country-panel"
+      ref={panelRef}
+      style={dragY ? { transform: `translateY(${dragY}px)`, transition: 'none' } : undefined}
+    >
+      {/* Stays pinned to the top while the memories scroll underneath. */}
+      <header
+        className="panel-head"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        <div className="sheet-handle" aria-hidden="true" />
+        <div className="panel-head-row">
+          <div className="panel-title">
+            <h2>{country}</h2>
+            {memories && (
+              <span className="memory-count">
+                {memories.length} {memories.length === 1 ? 'memory' : 'memories'}
+              </span>
+            )}
+          </div>
+          <div className="panel-head-actions">
+            <button className="add-small" onClick={() => setAdding(true)} aria-label="Add a memory">
+              +
+            </button>
+            <button className="close" onClick={onClose} aria-label="Close">
+              ×
+            </button>
+          </div>
+        </div>
       </header>
 
       <button className="primary add-memory" onClick={() => setAdding(true)}>
