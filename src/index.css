@@ -88,8 +88,9 @@ body,
   font-size: 0.85rem;
 }
 
-/* Frosted dark glass, so the panel feels part of the space scene. */
-.country-panel {
+/* Dark colors shared by the panel and the add-memory pop-up. */
+.country-panel,
+.dialog {
   --surface: rgba(255, 255, 255, 0.06);
   --text: #eef1f6;
   --muted: #9aa3b5;
@@ -97,6 +98,11 @@ body,
   --hover: rgba(255, 255, 255, 0.1);
   --danger: #ff8a7a;
   color-scheme: dark;
+  color: var(--text);
+}
+
+/* Frosted dark glass, so the panel feels part of the space scene. */
+.country-panel {
   position: absolute;
   top: 76px;
   right: 16px;
@@ -267,11 +273,167 @@ button.link {
 .memory-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin: 16px 0;
+  gap: 14px;
+}
+
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: rgba(3, 5, 10, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fade-in 0.15s ease-out;
+}
+
+.dialog {
+  width: min(560px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 22px 24px;
+  background: rgba(14, 18, 30, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  animation: rise-in 0.2s ease-out;
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.dialog-header p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.dialog .close {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1.6rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 22px 16px;
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--muted);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.dropzone:hover,
+.dropzone.dragging {
+  border-color: var(--accent);
+  background: rgba(228, 87, 46, 0.08);
+}
+
+.dropzone strong {
+  color: var(--text);
+}
+
+.dropzone-icon {
+  font-size: 1.6rem;
+}
+
+.file-previews {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+}
+
+.file-preview {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+}
+
+.file-preview img,
+.file-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.file-preview .remove-file {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.file-preview .file-size {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  font-size: 0.68rem;
+}
+
+.file-preview.too-big {
+  outline: 2px solid var(--danger);
 }
 
 .form-actions {
@@ -598,4 +760,9 @@ button.secondary {
 
 .memory-actions .link:hover {
   opacity: 1;
+}
+
+.dialog a,
+.country-panel a {
+  color: var(--accent);
 }

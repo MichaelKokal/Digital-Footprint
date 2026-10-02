@@ -74,7 +74,10 @@ export default function CountryPanel({
         <button className="close" onClick={onClose} aria-label="Close">×</button>
       </header>
 
-      {adding ? (
+      <button className="primary add-memory" onClick={() => setAdding(true)}>
+        + Add a memory
+      </button>
+      {adding && (
         <MemoryForm
           country={country}
           userId={userId}
@@ -86,15 +89,11 @@ export default function CountryPanel({
             load()
           }}
         />
-      ) : (
-        <button className="primary add-memory" onClick={() => setAdding(true)}>
-          + Add a memory
-        </button>
       )}
 
       {error && <p className="form-message error">{error}</p>}
       {memories === null && !error && <p className="empty">Loading…</p>}
-      {memories?.length === 0 && !adding && <p className="empty">No memories here yet.</p>}
+      {memories?.length === 0 && <p className="empty">No memories here yet.</p>}
 
       <div className="memory-list">
         {memories?.map((m) => (
