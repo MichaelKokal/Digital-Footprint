@@ -6,7 +6,8 @@ import MemoryCard from './MemoryCard'
 import { errorText } from '../lib/errors'
 import { isPhoneLayout } from '../lib/device'
 
-// How far the panel must be dragged down (in pixels) before it closes.
+// How far (in pixels) the phone sheet must be dragged to change size or close.
+const SWIPE_DISTANCE = 60
 const SWIPE_CLOSE_DISTANCE = 90
 
 type Props = {
@@ -60,22 +61,41 @@ export default function CountryPanel({
       ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }, [focusMemoryId, memories])
 
-  // On phones, dragging the panel's header downward slides it away.
-  const [dragY, setDragY] = useState(0)
-  const dragStart = useRef<number | null>(null)
+  // On phones the panel is a sheet with two sizes: half the screen, or
+  // expanded to nearly full. Dragging its header resizes it under your
+  // finger; letting go snaps it to a size, or closes it.
+  const [expanded, setExpanded] = useState(false)
+  const [dragHeight, setDragHeight] = useState<number | null>(null)
+  const drag = useRef<{ startY: number; startHeight: number; dy: number } | null>(null)
 
   function onTouchStart(e: TouchEvent) {
-    if (isPhoneLayout()) dragStart.current = e.touches[0].clientY
+    if (!isPhoneLayout() || !panelRef.current) return
+    drag.current = {
+      startY: e.touches[0].clientY,
+      startHeight: panelRef.current.offsetHeight,
+      dy: 0,
+    }
   }
   function onTouchMove(e: TouchEvent) {
-    if (dragStart.current === null) return
-    setDragY(Math.max(0, e.touches[0].clientY - dragStart.current))
+    const d = drag.current
+    if (!d) return
+    d.dy = e.touches[0].clientY - d.startY
+    setDragHeight(Math.min(Math.max(d.startHeight - d.dy, 60), window.innerHeight - 12))
   }
   function onTouchEnd() {
-    if (dragStart.current === null) return
-    dragStart.current = null
-    if (dragY > SWIPE_CLOSE_DISTANCE) onClose()
-    else setDragY(0)
+    const d = drag.current
+    if (!d) return
+    drag.current = null
+    setDragHeight(null)
+    if (expanded) {
+      // A long pull from full size closes it; a short one shrinks it to half.
+      if (d.dy > d.startHeight / 2) onClose()
+      else if (d.dy > SWIPE_DISTANCE) setExpanded(false)
+    } else if (d.dy < -SWIPE_DISTANCE) {
+      setExpanded(true)
+    } else if (d.dy > SWIPE_CLOSE_DISTANCE) {
+      onClose()
+    }
   }
 
   async function remove(memory: Memory) {
@@ -91,9 +111,9 @@ export default function CountryPanel({
 
   return (
     <aside
-      className="country-panel"
+      className={expanded ? 'country-panel expanded' : 'country-panel'}
       ref={panelRef}
-      style={dragY ? { transform: `translateY(${dragY}px)`, transition: 'none' } : undefined}
+      style={dragHeight === null ? undefined : { height: dragHeight, transition: 'none' }}
     >
       {/* Stays pinned to the top while the memories scroll underneath. */}
       <header
@@ -102,7 +122,11 @@ export default function CountryPanel({
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
       >
-        <div className="sheet-handle" aria-hidden="true" />
+        <button
+          className="sheet-handle"
+          onClick={() => setExpanded(!expanded)}
+          aria-label={expanded ? 'Shrink panel' : 'Expand panel'}
+        />
         <div className="panel-head-row">
           <div className="panel-title">
             <h2>{country}</h2>

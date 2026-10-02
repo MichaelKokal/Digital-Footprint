@@ -161,10 +161,23 @@ body,
   display: none;
 }
 
+/* The grab handle: a thin bar inside a bigger, easier-to-tap button. */
 .sheet-handle {
+  width: 64px;
+  height: 20px;
+  margin: -4px auto 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.sheet-handle::before {
+  content: '';
+  display: block;
   width: 40px;
   height: 5px;
-  margin: 0 auto 10px;
+  margin: 0 auto;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.28);
 }
@@ -239,6 +252,12 @@ body,
     border-bottom: none;
     border-radius: 20px 20px 0 0;
     animation: sheet-up 0.28s ease-out;
+    transition: height 0.25s ease-out;
+    /* Above the floating title, so the expanded sheet isn't covered. */
+    z-index: 1200;
+  }
+  .country-panel.expanded {
+    height: calc(100dvh - 12px - env(safe-area-inset-top));
   }
   .panel-head {
     margin: 0 -16px;
