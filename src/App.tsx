@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState } from 'react'
 import EarthGlobe, { type GlobeClick } from './components/EarthGlobe'
 import CountryPanel from './components/CountryPanel'
 import SignIn from './components/SignIn'
+import GlobeSearch from './components/GlobeSearch'
 import { supabase, isConfigured } from './lib/supabase'
 import { useSession } from './lib/useSession'
 import { listPins, type Pin } from './lib/memories'
 import { isPhoneLayout } from './lib/device'
+import { countryCenter } from './data/countries'
 
 export default function App() {
   const { session, loading } = useSession()
@@ -38,6 +40,10 @@ export default function App() {
   function selectCountry(click: GlobeClick) {
     setSelected(click)
     setFocusMemoryId(null)
+  }
+
+  function selectCountryByName(name: string) {
+    selectCountry({ country: name, ...countryCenter(name) })
   }
 
   function selectPin(pin: Pin) {
@@ -99,6 +105,14 @@ export default function App() {
           <h1>Digital Footprint</h1>
           <p>Spin the globe and click a country to see your memories there.</p>
         </div>
+        {session && (
+          <GlobeSearch
+            pins={pins}
+            counts={counts}
+            onPickCountry={selectCountryByName}
+            onPickMemory={selectPin}
+          />
+        )}
         {session && (
           <button
             className="sign-out"

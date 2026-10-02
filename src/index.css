@@ -1039,3 +1039,116 @@ button.secondary {
     background: var(--accent);
   }
 }
+
+/* Search box floating at the top of the globe. */
+.globe-search {
+  position: relative;
+  flex: 0 1 340px;
+  margin-left: auto;
+}
+
+.globe-search input {
+  width: 100%;
+  padding: 8px 14px 8px 34px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: #eef1f6;
+  background: rgba(12, 16, 28, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font: inherit;
+  font-size: 0.9rem;
+  color-scheme: dark;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.globe-search input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(12, 16, 28, 0.85);
+}
+
+.globe-search input::placeholder {
+  color: #8a93a6;
+}
+
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-52%);
+  color: #8a93a6;
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(14, 18, 30, 0.96);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.search-results button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #eef1f6;
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.search-results button.highlighted {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.result-main {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result-side {
+  flex-shrink: 0;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #8a93a6;
+  font-size: 0.8rem;
+}
+
+.search-empty {
+  padding: 8px 10px;
+  color: #8a93a6;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 600px) {
+  .top-bar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+  /* On phones the search box gets its own full-width row under the title. */
+  .globe-search {
+    order: 3;
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+}
