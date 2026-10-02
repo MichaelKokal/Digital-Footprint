@@ -304,12 +304,23 @@ body,
   select {
     font-size: 16px;
   }
+  /* Logo, title and both buttons have to share one narrow row. */
   .top-bar h1 {
-    font-size: 1.3rem;
+    font-size: 1.15rem;
+  }
+  .brand {
+    gap: 8px;
   }
   .brand-mark {
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
+  }
+  .top-actions {
+    gap: 6px;
+  }
+  .pill-button {
+    padding: 6px 11px;
+    font-size: 0.8rem;
   }
   .top-bar p {
     display: none;
