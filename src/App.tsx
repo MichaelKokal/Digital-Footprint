@@ -91,11 +91,13 @@ export default function App() {
   return (
     <div className="app">
       <header className="top-bar">
-        <h1>Digital Footprint</h1>
-        <p>Spin the globe and click a country to see your memories there.</p>
+        <div className="brand">
+          <h1>Digital Footprint</h1>
+          <p>Spin the globe and click a country to see your memories there.</p>
+        </div>
         {session && (
           <button
-            className="link sign-out"
+            className="sign-out"
             onClick={() => {
               setSelected(null)
               setPins([])

@@ -25,30 +25,46 @@ body,
 }
 
 .app {
+  position: relative;
   display: flex;
   flex-direction: column;
   height: 100%;
 }
 
+/* The title floats over the globe instead of taking up a bar of its own.
+   Its empty areas let clicks and drags pass through to the globe. */
 .top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1100;
   display: flex;
-  align-items: baseline;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 16px;
-  padding: 12px 20px;
-  border-bottom: 1px solid #1c2333;
-  background: #0b0f1a;
+  padding: 18px 22px 40px;
   color: #f2f4f8;
+  background: linear-gradient(rgba(0, 0, 0, 0.55), transparent);
+  pointer-events: none;
+}
+
+.top-bar > * {
+  pointer-events: auto;
 }
 
 .top-bar h1 {
   margin: 0;
-  font-size: 1.25rem;
+  font-size: 1.45rem;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
 }
 
 .top-bar p {
-  margin: 0;
-  color: #9aa3b5;
-  font-size: 0.9rem;
+  margin: 2px 0 0;
+  color: #b4bccb;
+  font-size: 0.88rem;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
 }
 
 .map-area {
@@ -82,7 +98,7 @@ body,
   --danger: #ff8a7a;
   color-scheme: dark;
   position: absolute;
-  top: 16px;
+  top: 76px;
   right: 16px;
   bottom: 16px;
   width: min(380px, calc(100% - 32px));
@@ -125,6 +141,12 @@ body,
 }
 
 @media (max-width: 600px) {
+  .top-bar {
+    padding: 14px 16px 32px;
+  }
+  .top-bar h1 {
+    font-size: 1.2rem;
+  }
   .top-bar p {
     display: none;
   }
@@ -136,12 +158,30 @@ body,
   }
 }
 
+.sign-out,
+.visited-badge {
+  padding: 7px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #eef1f6;
+  background: rgba(12, 16, 28, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font: inherit;
+  font-size: 0.85rem;
+}
+
 .sign-out {
-  margin-left: auto;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.sign-out:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .notice {
-  margin: 48px auto;
+  margin: 110px auto 0;
   max-width: 480px;
   padding: 0 16px;
   color: #9aa3b5;
@@ -367,13 +407,8 @@ button.link.danger {
 .visited-badge {
   position: absolute;
   left: 16px;
-  top: 16px;
+  bottom: 16px;
   z-index: 1000;
-  padding: 6px 12px;
-  background: var(--surface);
-  border-radius: 999px;
-  box-shadow: var(--shadow);
-  font-size: 0.85rem;
 }
 
 .location {
