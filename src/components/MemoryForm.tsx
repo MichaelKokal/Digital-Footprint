@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { createMemory } from '../lib/memories'
 import { searchPlaces, type Place } from '../lib/places'
 import { countryAt } from '../data/countries'
+import { errorText } from '../lib/errors'
 
 type Props = {
   country: string
@@ -36,7 +37,7 @@ export default function MemoryForm({ country, userId, spot, onSaved, onCancel }:
     try {
       setResults(await searchPlaces(query.trim()))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Search failed.')
+      setError(errorText(err, 'Search failed.'))
     }
     setSearching(false)
   }
@@ -63,7 +64,7 @@ export default function MemoryForm({ country, userId, spot, onSaved, onCancel }:
       })
       onSaved()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong.')
+      setError(errorText(err, 'Something went wrong.'))
       setBusy(false)
     }
   }

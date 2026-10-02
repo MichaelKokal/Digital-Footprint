@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { listMemories, deleteMemory, type Memory } from '../lib/memories'
 import MemoryForm from './MemoryForm'
 import MediaViewer from './MediaViewer'
+import { errorText } from '../lib/errors'
 
 type Props = {
   country: string
@@ -10,10 +11,6 @@ type Props = {
   focusMemoryId: string | null
   onClose: () => void
   onChanged: () => void
-}
-
-function errorText(err: unknown, fallback: string) {
-  return err instanceof Error ? err.message : fallback
 }
 
 function formatDate(iso: string) {
