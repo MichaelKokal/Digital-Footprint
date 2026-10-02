@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { listMemories, deleteMemory, type Memory } from '../lib/memories'
 import MemoryForm from './MemoryForm'
 import MediaViewer from './MediaViewer'
+import MemoryCard from './MemoryCard'
 import { errorText } from '../lib/errors'
 
 type Props = {
@@ -11,14 +12,6 @@ type Props = {
   focusMemoryId: string | null
   onClose: () => void
   onChanged: () => void
-}
-
-function formatDate(iso: string) {
-  return new Date(iso + 'T00:00:00').toLocaleDateString(undefined, {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
 }
 
 export default function CountryPanel({
@@ -103,50 +96,17 @@ export default function CountryPanel({
       {memories === null && !error && <p className="empty">Loading…</p>}
       {memories?.length === 0 && !adding && <p className="empty">No memories here yet.</p>}
 
-      {memories?.map((m) => (
-        <article
-          key={m.id}
-          data-memory-id={m.id}
-          className={m.id === focusMemoryId ? 'memory focused' : 'memory'}
-        >
-          <div className="memory-head">
-            <div>
-              <h3>{m.title}</h3>
-              <div className="memory-meta">
-                {m.place && <span>📍 {m.place}</span>}
-                {m.happened_on && <time>{formatDate(m.happened_on)}</time>}
-              </div>
-            </div>
-            <button className="link danger" onClick={() => remove(m)}>
-              Delete
-            </button>
-          </div>
-          {m.note && <p className="note">{m.note}</p>}
-          {m.media.length > 0 && (
-            <div className="media-grid">
-              {m.media.map((item, i) =>
-                !item.url ? null : (
-                  <button
-                    key={item.id}
-                    className="media-thumb"
-                    aria-label={`Open ${item.kind} ${i + 1}`}
-                    onClick={() => setViewing({ memory: m, index: i })}
-                  >
-                    {item.kind === 'video' ? (
-                      <>
-                        <video src={item.url} muted preload="metadata" />
-                        <span className="play-icon">▶</span>
-                      </>
-                    ) : (
-                      <img src={item.url} alt={m.title} loading="lazy" />
-                    )}
-                  </button>
-                ),
-              )}
-            </div>
-          )}
-        </article>
-      ))}
+      <div className="memory-list">
+        {memories?.map((m) => (
+          <MemoryCard
+            key={m.id}
+            memory={m}
+            focused={m.id === focusMemoryId}
+            onOpenMedia={(index) => setViewing({ memory: m, index })}
+            onDelete={() => remove(m)}
+          />
+        ))}
+      </div>
 
       {viewing && (
         <MediaViewer
