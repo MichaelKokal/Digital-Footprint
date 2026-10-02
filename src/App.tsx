@@ -64,6 +64,7 @@ export default function App() {
           focus={selected}
           counts={counts}
           pins={pins}
+          activePinId={focusMemoryId}
           onSelect={selectCountry}
           onPinClick={selectPin}
         />

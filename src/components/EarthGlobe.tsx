@@ -1,6 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import Globe, { type GlobeMethods } from 'react-globe.gl'
-import { Mesh, MeshLambertMaterial, SphereGeometry } from 'three'
+import {
+  AdditiveBlending,
+  Group,
+  Mesh,
+  MeshBasicMaterial,
+  MeshLambertMaterial,
+  SphereGeometry,
+} from 'three'
 import { countries, type CountryFeature } from '../data/countries'
 import type { Pin } from '../lib/memories'
 
@@ -12,6 +19,8 @@ type Props = {
   focus: { lat: number; lng: number } | null
   counts: Map<string, number>
   pins: Pin[]
+  // The memory being viewed; its pin gently pulses.
+  activePinId: string | null
   onSelect: (click: GlobeClick) => void
   onPinClick: (pin: Pin) => void
 }
@@ -19,9 +28,31 @@ type Props = {
 const PIN_HEIGHT = 0.06
 const PIN_COLOR = '#e4572e'
 
-// One shared shape for every pin head keeps the globe fast with many pins.
+// Shared shapes for every pin keep the globe fast with many pins.
 const pinHeadGeometry = new SphereGeometry(0.9, 16, 16)
-const pinHeadMaterial = new MeshLambertMaterial({ color: PIN_COLOR })
+const pinHeadMaterial = new MeshLambertMaterial({
+  color: PIN_COLOR,
+  emissive: PIN_COLOR,
+  emissiveIntensity: 0.35,
+})
+const pinGlowGeometry = new SphereGeometry(2, 16, 16)
+
+type PinObject = { group: Group; glow: MeshBasicMaterial }
+
+// A pin head: a solid red ball inside a soft see-through glow.
+function makePinHead(): PinObject {
+  const glow = new MeshBasicMaterial({
+    color: PIN_COLOR,
+    transparent: true,
+    opacity: 0.18,
+    blending: AdditiveBlending,
+    depthWrite: false,
+  })
+  const group = new Group()
+  group.add(new Mesh(pinHeadGeometry, pinHeadMaterial))
+  group.add(new Mesh(pinGlowGeometry, glow))
+  return { group, glow }
+}
 
 const COLORS = {
   base: 'rgba(255, 255, 255, 0.03)',
@@ -63,12 +94,53 @@ export default function EarthGlobe({
   focus,
   counts,
   pins,
+  activePinId,
   onSelect,
   onPinClick,
 }: Props) {
   const globeRef = useRef<GlobeMethods | undefined>(undefined)
   const [containerRef, size] = useSize<HTMLDivElement>()
   const [hovered, setHovered] = useState<CountryFeature | null>(null)
+
+  // Pin animation reads these every frame, so they live in refs, not state.
+  const pinObjects = useRef(new Map<string, PinObject>())
+  const hoveredPinId = useRef<string | null>(null)
+  const activePinRef = useRef(activePinId)
+  useEffect(() => {
+    activePinRef.current = activePinId
+  }, [activePinId])
+
+  // Hovered pins grow and brighten; the active pin breathes in and out.
+  useEffect(() => {
+    let frame = 0
+    const animate = (time: number) => {
+      const pulse = (Math.sin(time / 300) + 1) / 2
+      for (const [id, pin] of pinObjects.current) {
+        const isHovered = id === hoveredPinId.current
+        const isActive = id === activePinRef.current
+        const targetScale = isHovered ? 1.6 : isActive ? 1.25 + 0.2 * pulse : 1
+        const targetGlow = isHovered ? 0.5 : isActive ? 0.25 + 0.3 * pulse : 0.18
+        const scale = pin.group.scale.x + (targetScale - pin.group.scale.x) * 0.2
+        pin.group.scale.setScalar(scale)
+        pin.glow.opacity += (targetGlow - pin.glow.opacity) * 0.2
+      }
+      frame = requestAnimationFrame(animate)
+    }
+    frame = requestAnimationFrame(animate)
+    return () => cancelAnimationFrame(frame)
+  }, [])
+
+  // Forget pins whose memories were deleted.
+  useEffect(() => {
+    const ids = new Set(pins.map((p) => p.id))
+    for (const id of pinObjects.current.keys()) {
+      if (!ids.has(id)) pinObjects.current.delete(id)
+    }
+  }, [pins])
+
+  const hoverPin = (d: object | null) => {
+    hoveredPinId.current = d ? (d as Pin).id : null
+  }
 
   // Spin slowly on its own until the person grabs the globe.
   function onGlobeReady() {
@@ -137,14 +209,20 @@ export default function EarthGlobe({
           pointsTransitionDuration={0}
           pointLabel={(d) => pinLabel(d as Pin)}
           onPointClick={(d) => onPinClick(d as Pin)}
+          onPointHover={hoverPin}
           // Pin heads
           objectsData={pins}
           objectLat="lat"
           objectLng="lng"
           objectAltitude={PIN_HEIGHT}
-          objectThreeObject={() => new Mesh(pinHeadGeometry, pinHeadMaterial)}
+          objectThreeObject={(d) => {
+            const pin = makePinHead()
+            pinObjects.current.set((d as Pin).id, pin)
+            return pin.group
+          }}
           objectLabel={(d) => pinLabel(d as Pin)}
           onObjectClick={(d) => onPinClick(d as Pin)}
+          onObjectHover={hoverPin}
         />
       )}
     </div>
