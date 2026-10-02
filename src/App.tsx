@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import WorldMap from './components/WorldMap'
+import EarthGlobe, { type GlobeClick } from './components/EarthGlobe'
 import CountryPanel from './components/CountryPanel'
 import SignIn from './components/SignIn'
 import { supabase, isConfigured } from './lib/supabase'
@@ -8,9 +8,9 @@ import { countMemoriesByCountry } from './lib/memories'
 
 export default function App() {
   const { session, loading } = useSession()
-  const [selected, setSelected] = useState<string | null>(null)
+  const [selected, setSelected] = useState<GlobeClick | null>(null)
   const [counts, setCounts] = useState<Map<string, number>>(new Map())
-  // Bumped whenever memories are added or deleted, so the map recolors.
+  // Bumped whenever memories are added or deleted, so the globe recolors.
   const [version, setVersion] = useState(0)
   const userId = session?.user.id
 
@@ -41,7 +41,7 @@ export default function App() {
   } else {
     content = (
       <main className="map-area">
-        <WorldMap selected={selected} counts={counts} onSelect={setSelected} />
+        <EarthGlobe selected={selected?.country ?? null} counts={counts} onSelect={setSelected} />
         {counts.size > 0 && (
           <div className="visited-badge">
             {counts.size} {counts.size === 1 ? 'country' : 'countries'} visited
@@ -49,8 +49,8 @@ export default function App() {
         )}
         {selected && (
           <CountryPanel
-            key={selected}
-            country={selected}
+            key={selected.country}
+            country={selected.country}
             userId={session.user.id}
             onClose={() => setSelected(null)}
             onChanged={() => setVersion((v) => v + 1)}
@@ -64,7 +64,7 @@ export default function App() {
     <div className="app">
       <header className="top-bar">
         <h1>Digital Footprint</h1>
-        <p>Click a country to see your memories there.</p>
+        <p>Spin the globe and click a country to see your memories there.</p>
         {session && (
           <button
             className="link sign-out"
