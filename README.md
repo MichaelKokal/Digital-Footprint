@@ -3,6 +3,8 @@ Leave your memories where they happened. Digital Footprint is a global interacti
 
 **Try it live: [digital-footprint-murex.vercel.app](https://digital-footprint-murex.vercel.app)**
 
+![Digital Footprint: a 3D globe with pins marking memories in visited countries](docs/screenshot.png)
+
 ## Features
 
 - **Spinning 3D globe** – drag to turn the Earth, scroll to zoom, and click any country.
