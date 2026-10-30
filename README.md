@@ -7,7 +7,7 @@ Leave your memories where they happened. Digital Footprint is a global interacti
 
 ## Features
 
-- **Spinning 3D globe**: drag to turn the Earth, scroll to zoom, and click any country.
+- **Spinning 3D globe**- drag to turn the Earth, scroll to zoom, and click any country.
 - **Memories with photos and videos**: give each memory a title, date, story, and as many photos or videos as you like.
 - **Pins on the globe**: every memory gets a glowing 3D pin at the exact spot it happened. Pin it where you clicked, or search for a city, state or landmark.
 - **Visited countries**: countries you have memories in are shaded, with a running count of how many you've visited.
